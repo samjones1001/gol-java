@@ -6,11 +6,13 @@ public class World {
     private Integer rowSize;
     private String[] grid;
     private Printer printer;
+    private Integer[] neighbourLocations;
 
     public World(Integer size, Printer printer) {
         this.rowSize = size;
         this.grid = new String[size*size];
         this.printer = printer;
+        this.neighbourLocations = new Integer[] {-1, -rowSize-1, -rowSize, -rowSize+1, +1, rowSize+1, rowSize, rowSize-1};
 
         Arrays.fill(grid, 0, grid.length, " ");
     }
@@ -27,6 +29,17 @@ public class World {
 
     public void tick() {
         printGrid();
+    }
+
+    public Integer liveNeighbours(Integer cellIndex) {
+        Integer neighbourCount = 0;
+        for (Integer indexModifier : neighbourLocations) {
+            if (cellIndex + indexModifier >= 0 && cellIndex + indexModifier < grid.length && grid[cellIndex + indexModifier] == "#") {
+                neighbourCount += 1;
+            }
+        }
+
+        return neighbourCount;
     }
 
     private void printGrid() {
