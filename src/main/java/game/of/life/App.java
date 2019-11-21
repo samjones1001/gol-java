@@ -1,13 +1,13 @@
 package game.of.life;
 
+import java.util.Timer;
+
 public class App {
     public static void main(String[] args) {
-        Printer printer = new Printer();
-        World world = new World(3, printer);
-        Integer[][] cellsToPopulate = new Integer[][]{{1,0},{1,1},{1,2}};
-        world.populate(cellsToPopulate);
+        World world = new World(25, new Printer());
+        world.populate();
 
-        world.tick();
-        world.tick();
+        Timer timer = new Timer();
+        timer.schedule(world, 0, 1000);
     }
 }

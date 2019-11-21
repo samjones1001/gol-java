@@ -1,17 +1,17 @@
 package game.of.life;
 
-public class World {
-    private Integer rowSize;
+import java.util.TimerTask;
+
+public class World extends TimerTask {
     private String[][] grid;
     private String[][] previousGrid;
     private Printer printer;
     private Integer[][] neighbourLocations;
 
-    private static final String emptyCell = " ";
-    private static final String populatedCell = "#";
+    private static final String emptyCell = "   ";
+    private static final String populatedCell = " # ";
 
     public World(Integer size, Printer printer) {
-        this.rowSize = size;
         this.grid = new String[size][size];
         this.printer = printer;
         this.neighbourLocations = new Integer[][] {{0,-1}, {-1,-1}, {-1,0}, {-1,1}, {0,1}, {1,1}, {1,0}, {1,-1}};
@@ -42,7 +42,7 @@ public class World {
         buildPreviousGrid();
     }
 
-    public void tick() {
+    public void run() {
         printGrid();
         buildPreviousGrid();
         for(Integer row = 0; row < grid.length; row++) {
@@ -95,11 +95,25 @@ public class World {
     private Integer liveNeighbours(Integer rowIndex, Integer cellIndex) {
         Integer neighbourCount = 0;
 
-        for (Integer[] indexModifiers : neighbourLocations) {
-            if (rowIndex + indexModifiers[0] >= 0 && cellIndex + indexModifiers[1] >= 0 && rowIndex + indexModifiers[0] < grid.length && cellIndex + indexModifiers[1] < grid[rowIndex].length && previousGrid[rowIndex + indexModifiers[0]][cellIndex + indexModifiers[1]] == "#") {
-                neighbourCount += 1;
+        for (Integer[] indexModifier : neighbourLocations) {
+            if (rowAndCellIndexNotNegative(rowIndex, cellIndex, indexModifier) &&
+                rowAndCellIndexNotOutOfBounds(rowIndex, cellIndex, indexModifier) &&
+                cellIsAlive(rowIndex, cellIndex, indexModifier)) {
+                    neighbourCount += 1;
             }
         }
         return neighbourCount;
+    }
+
+    private Boolean rowAndCellIndexNotNegative(Integer rowIndex, Integer cellIndex, Integer[] indexModifier) {
+        return rowIndex + indexModifier[0] >= 0 && cellIndex + indexModifier[1] >= 0;
+    }
+
+    private Boolean rowAndCellIndexNotOutOfBounds(Integer rowIndex, Integer cellIndex, Integer[] indexModifier) {
+        return rowIndex + indexModifier[0] < grid.length && cellIndex + indexModifier[1] < grid[rowIndex].length;
+    }
+
+    private Boolean cellIsAlive(Integer rowIndex, Integer cellIndex, Integer[] indexModifier) {
+        return previousGrid[rowIndex + indexModifier[0]][cellIndex + indexModifier[1]] == populatedCell;
     }
 }

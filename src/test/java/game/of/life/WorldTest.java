@@ -27,7 +27,7 @@ public class WorldTest {
 
         int row = new Random().nextInt(world.getGrid().length);
         int cell = new Random().nextInt(world.getGrid()[row].length);
-        assertEquals(" ", world.getGrid()[row][cell]);
+        assertEquals("   ", world.getGrid()[row][cell]);
     }
 
     @Test
@@ -37,13 +37,13 @@ public class WorldTest {
         World world = new World(3, printer);
         world.populate(new Integer[][]{{0,1},{1,1},{2,1}});
 
-        assertEquals("#", world.getGrid()[0][1]);
-        assertEquals("#", world.getGrid()[1][1]);
-        assertEquals("#", world.getGrid()[2][1]);
+        assertEquals(" # ", world.getGrid()[0][1]);
+        assertEquals(" # ", world.getGrid()[1][1]);
+        assertEquals(" # ", world.getGrid()[2][1]);
     }
 
     @Test public void testPopulatesCellsAtRandom() {
-        String[] expectedCellContents = {" ","#"};
+        String[] expectedCellContents = {"   "," # "};
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
@@ -56,13 +56,13 @@ public class WorldTest {
 
     @Test
     void printsTheGrid() {
-        String expectedOutput = " # \n # \n # \n";
+        String expectedOutput = "    #    \n    #    \n    #    \n";
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
 
         world.populate(new Integer[][]{{0,1},{1,1},{2,1}});
-        world.tick();
+        world.run();
 
         assertEquals(expectedOutput, io.lastOutput);
     }
@@ -74,9 +74,9 @@ public class WorldTest {
         World world = new World(3, printer);
         world.populate(new Integer[][]{{0,0}, {0,1}, {0,2}, {1,0}, {1,1}, {1,2}, {2,0}, {2,1}, {2,2}});
 
-        world.tick();
+        world.run();
 
-        assertEquals(" ", world.getGrid()[1][1]);
+        assertEquals("   ", world.getGrid()[1][1]);
     }
 
     @Test
@@ -86,9 +86,9 @@ public class WorldTest {
         World world = new World(3, printer);
         world.populate(new Integer[][]{{0,0}, {1,1}});
 
-        world.tick();
+        world.run();
 
-        assertEquals(" ", world.getGrid()[1][1]);
+        assertEquals("   ", world.getGrid()[1][1]);
     }
 
     @Test
@@ -98,9 +98,9 @@ public class WorldTest {
         World world = new World(3, printer);
         world.populate(new Integer[][]{{0,0}, {0,1}, {1,1}});
 
-        world.tick();
+        world.run();
 
-        assertEquals("#", world.getGrid()[1][1]);
+        assertEquals(" # ", world.getGrid()[1][1]);
     }
 
     @Test
@@ -110,9 +110,9 @@ public class WorldTest {
         World world = new World(3, printer);
         world.populate(new Integer[][]{{0,0}, {0,1}, {0,2}, {1,1}});
 
-        world.tick();
+        world.run();
 
-        assertEquals("#", world.getGrid()[1][1]);
+        assertEquals(" # ", world.getGrid()[1][1]);
     }
 
     @Test
@@ -122,9 +122,9 @@ public class WorldTest {
         World world = new World(3, printer);
         world.populate(new Integer[][]{{0,0}, {0,1}, {0,2}, {1,0}, {1,1}, {1,2}, {2,0}, {2,1}, {2,2}});
 
-        world.tick();
+        world.run();
 
-        assertEquals(" ", world.getGrid()[1][1]);
+        assertEquals("   ", world.getGrid()[1][1]);
     }
 
     @Test
@@ -134,9 +134,9 @@ public class WorldTest {
         World world = new World(3, printer);
         world.populate(new Integer[][]{{1,1}});
 
-        world.tick();
+        world.run();
 
-        assertEquals(" ", world.getGrid()[1][1]);
+        assertEquals("   ", world.getGrid()[1][1]);
     }
 
     @Test
@@ -146,9 +146,9 @@ public class WorldTest {
         World world = new World(3, printer);
         world.populate(new Integer[][]{{0,0}, {0,1}});
 
-        world.tick();
+        world.run();
 
-        assertEquals(" ", world.getGrid()[1][1]);
+        assertEquals("   ", world.getGrid()[1][1]);
     }
 
     @Test
@@ -157,19 +157,19 @@ public class WorldTest {
         Printer printer = new Printer(io);
         World world = new World(3, printer);
         world.populate(new Integer[][]{{0,0}, {0,1}, {0,2}});
-        world.tick();
+        world.run();
 
-        assertEquals("#", world.getGrid()[1][1]);
+        assertEquals(" # ", world.getGrid()[1][1]);
     }
 
     @Test
     void gridUpdatesCorrectlyAccordingToRules() {
-        String[][] expectedOutput = new String[][]{{" ", "#", " "}, {" ", "#", " "}, {" ", "#", " "}};
+        String[][] expectedOutput = new String[][]{{"   ", " # ", "   "}, {"   ", " # ", "   "}, {"   ", " # ", "   "}};
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
         world.populate(new Integer[][]{{1,0}, {1,1}, {1,2}});
-        world.tick();
+        world.run();
 
         assertArrayEquals(expectedOutput, world.getGrid());
     }
