@@ -2,9 +2,10 @@ package game.of.life;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class WorldTest {
     @Test
@@ -13,7 +14,9 @@ public class WorldTest {
         Printer printer = new Printer(io);
         World world = new World(3, printer);
 
-        assertEquals(9, world.getGrid().length);
+        assertEquals(3, world.getGrid().length);
+        assertEquals(3, world.getGrid()[0].length);
+
     }
 
     @Test
@@ -22,8 +25,9 @@ public class WorldTest {
         Printer printer = new Printer(io);
         World world = new World(3, printer);
 
-        int cell = new Random().nextInt(world.getGrid().length);
-        assertEquals(" ", world.getGrid()[cell]);
+        int row = new Random().nextInt(world.getGrid().length);
+        int cell = new Random().nextInt(world.getGrid()[row].length);
+        assertEquals(" ", world.getGrid()[row][cell]);
     }
 
     @Test
@@ -31,11 +35,23 @@ public class WorldTest {
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
-        world.populate(new Integer[]{1,4,7});
+        world.populate(new Integer[][]{{0,1},{1,1},{2,1}});
 
-        assertEquals("#", world.getGrid()[1]);
-        assertEquals("#", world.getGrid()[4]);
-        assertEquals("#", world.getGrid()[7]);
+        assertEquals("#", world.getGrid()[0][1]);
+        assertEquals("#", world.getGrid()[1][1]);
+        assertEquals("#", world.getGrid()[2][1]);
+    }
+
+    @Test public void testPopulatesCellsAtRandom() {
+        String[] expectedCellContents = {" ","#"};
+        MockIO io = new MockIO();
+        Printer printer = new Printer(io);
+        World world = new World(3, printer);
+        world.populate();
+
+        String[] row = world.getGrid()[new Random().nextInt(world.getGrid().length)];
+        String cell = row[new Random().nextInt(row.length)];
+        assertTrue(Arrays.asList(expectedCellContents).contains(cell));
     }
 
     @Test
@@ -45,109 +61,118 @@ public class WorldTest {
         Printer printer = new Printer(io);
         World world = new World(3, printer);
 
-        world.populate(new Integer[]{1,4,7});
+        world.populate(new Integer[][]{{0,1},{1,1},{2,1}});
         world.tick();
 
         assertEquals(expectedOutput, io.lastOutput);
     }
 
     @Test
-    void recognisesWhenACellHasNoLiveNeighbours() {
+    void aLiveCellWithMoreThanThreeNeighboursDies() {
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
-        world.populate(new Integer[]{4});
+        world.populate(new Integer[][]{{0,0}, {0,1}, {0,2}, {1,0}, {1,1}, {1,2}, {2,0}, {2,1}, {2,2}});
 
-        assertEquals(0, world.liveNeighbours(4));
+        world.tick();
+
+        assertEquals(" ", world.getGrid()[1][1]);
     }
 
     @Test
-    void recognisesALiveNeighbourToTheLeftOfACell() {
+    void aLiveCellWithLessThanTwoNeighboursDies() {
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
-        world.populate(new Integer[]{3, 4});
+        world.populate(new Integer[][]{{0,0}, {1,1}});
 
-        assertEquals(1, world.liveNeighbours(4));
+        world.tick();
+
+        assertEquals(" ", world.getGrid()[1][1]);
     }
 
     @Test
-    void recognisesALiveNeighbourToTheRightOfACell() {
+    void aLiveCellWithTwoNeighboursSurvives() {
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
-        world.populate(new Integer[]{4, 5});
+        world.populate(new Integer[][]{{0,0}, {0,1}, {1,1}});
 
-        assertEquals(1, world.liveNeighbours(4));
+        world.tick();
+
+        assertEquals("#", world.getGrid()[1][1]);
     }
 
     @Test
-    void recognisesALiveNeighbourToTheTopOfACell() {
+    void aLiveCellWithThreeNeighboursSurvives() {
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
-        world.populate(new Integer[]{1, 4});
+        world.populate(new Integer[][]{{0,0}, {0,1}, {0,2}, {1,1}});
 
-        assertEquals(1, world.liveNeighbours(4));
+        world.tick();
+
+        assertEquals("#", world.getGrid()[1][1]);
     }
 
     @Test
-    void recognisesALiveNeighbourToTheBottomOfACell() {
+    void aDeadCellWithMoreThanThreeNeighboursIsStillDead() {
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
-        world.populate(new Integer[]{4, 7});
+        world.populate(new Integer[][]{{0,0}, {0,1}, {0,2}, {1,0}, {1,1}, {1,2}, {2,0}, {2,1}, {2,2}});
 
-        assertEquals(1, world.liveNeighbours(4));
+        world.tick();
+
+        assertEquals(" ", world.getGrid()[1][1]);
     }
 
     @Test
-    void recognisesALiveNeighbourToTheTopLeftOfACell() {
+    void aDeadCellWithLessThanTwoNeighboursIsStillDead() {
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
-        world.populate(new Integer[]{0, 4});
+        world.populate(new Integer[][]{{1,1}});
 
-        assertEquals(1, world.liveNeighbours(4));
+        world.tick();
+
+        assertEquals(" ", world.getGrid()[1][1]);
     }
 
     @Test
-    void recognisesALiveNeighbourToTheTopRightOfACell() {
+    void aDeadCellWithTwoNeighboursIsStillDead() {
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
-        world.populate(new Integer[]{4, 2});
+        world.populate(new Integer[][]{{0,0}, {0,1}});
 
-        assertEquals(1, world.liveNeighbours(4));
+        world.tick();
+
+        assertEquals(" ", world.getGrid()[1][1]);
     }
 
     @Test
-    void recognisesALiveNeighbourToTheBottomLeftOfACell() {
+    void aDeadCellWithThreeNeighboursComesToLife() {
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
-        world.populate(new Integer[]{4, 6});
+        world.populate(new Integer[][]{{0,0}, {0,1}, {0,2}});
+        world.tick();
 
-        assertEquals(1, world.liveNeighbours(4));
+        assertEquals("#", world.getGrid()[1][1]);
     }
 
     @Test
-    void recognisesALiveNeighbourToTheBottomRightOfACell() {
+    void gridUpdatesCorrectlyAccordingToRules() {
+        String[][] expectedOutput = new String[][]{{" ", "#", " "}, {" ", "#", " "}, {" ", "#", " "}};
         MockIO io = new MockIO();
         Printer printer = new Printer(io);
         World world = new World(3, printer);
-        world.populate(new Integer[]{4, 8});
+        world.populate(new Integer[][]{{1,0}, {1,1}, {1,2}});
+        world.tick();
 
-        assertEquals(1, world.liveNeighbours(4));
+        assertArrayEquals(expectedOutput, world.getGrid());
     }
 
-    @Test
-    void recognisesWhenACellHasMultipleLiveNeighbours() {
-        MockIO io = new MockIO();
-        Printer printer = new Printer(io);
-        World world = new World(3, printer);
-        world.populate(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 8});
 
-        assertEquals(8, world.liveNeighbours(4));
-    }
 }

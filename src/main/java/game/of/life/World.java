@@ -1,45 +1,69 @@
 package game.of.life;
 
-import java.util.Arrays;
-
 public class World {
     private Integer rowSize;
-    private String[] grid;
+    private String[][] grid;
+    private String[][] previousGrid;
     private Printer printer;
-    private Integer[] neighbourLocations;
+    private Integer[][] neighbourLocations;
+
+    private static final String emptyCell = " ";
+    private static final String populatedCell = "#";
 
     public World(Integer size, Printer printer) {
         this.rowSize = size;
-        this.grid = new String[size*size];
+        this.grid = new String[size][size];
         this.printer = printer;
-        this.neighbourLocations = new Integer[] {-1, -rowSize-1, -rowSize, -rowSize+1, +1, rowSize+1, rowSize, rowSize-1};
+        this.neighbourLocations = new Integer[][] {{0,-1}, {-1,-1}, {-1,0}, {-1,1}, {0,1}, {1,1}, {1,0}, {1,-1}};
 
-        Arrays.fill(grid, 0, grid.length, " ");
+        for (String[] row : grid) {
+            for (Integer cell = 0; cell < row.length; cell++) {
+                row[cell] = emptyCell;
+            }
+        }
     }
 
-    public String[] getGrid() {
+    public String[][] getGrid() {
         return grid;
     }
 
-    public void populate(Integer[] cellsToPopulate) {
-        for(Integer cell : cellsToPopulate) {
-            grid[cell] = "#";
+    public void populate() {
+        for (String[] row : grid) {
+            for (Integer cell = 0; cell < row.length; cell++) {
+                row[cell] = populateCell();
+            }
         }
+    }
+
+    public void populate(Integer[][] cellsToPopulate) {
+        for(Integer[] cellIndex : cellsToPopulate) {
+            grid[cellIndex[0]][cellIndex[1]] = populatedCell;
+        }
+        buildPreviousGrid();
     }
 
     public void tick() {
         printGrid();
-    }
-
-    public Integer liveNeighbours(Integer cellIndex) {
-        Integer neighbourCount = 0;
-        for (Integer indexModifier : neighbourLocations) {
-            if (cellIndex + indexModifier >= 0 && cellIndex + indexModifier < grid.length && grid[cellIndex + indexModifier] == "#") {
-                neighbourCount += 1;
+        buildPreviousGrid();
+        for(Integer row = 0; row < grid.length; row++) {
+            for(Integer cell = 0; cell < grid[row].length; cell++) {
+                grid[row][cell] = updateCell(row, cell);
             }
         }
+    }
 
-        return neighbourCount;
+    private String populateCell() {
+        if (Math.random() < 0.5) {
+            return emptyCell;
+        }
+        return populatedCell;
+    }
+
+    private void buildPreviousGrid() {
+        previousGrid = grid.clone();
+        for (int i = 0; i < previousGrid.length; i++) {
+            previousGrid[i] = grid[i].clone();
+        }
     }
 
     private void printGrid() {
@@ -48,8 +72,8 @@ public class World {
 
     private String buildGridString() {
         String gridString = "";
-        for(int i=0; i<grid.length; i+=rowSize){
-            gridString += buildRowString(Arrays.copyOfRange(grid, i, Math.min(grid.length,i+rowSize))) + "\n";
+        for(String[] row : grid){
+            gridString += buildRowString(row) + "\n";
         }
 
         return gridString;
@@ -57,5 +81,25 @@ public class World {
 
     private String buildRowString(String[] row) {
         return String.join("", row);
+    }
+
+    private String updateCell(Integer rowIndex, Integer cellIndex) {
+        if (liveNeighbours(rowIndex, cellIndex) > 3 || liveNeighbours(rowIndex, cellIndex ) < 2) {
+            return emptyCell;
+        } else if (liveNeighbours(rowIndex, cellIndex) == 3) {
+            return populatedCell;
+        }
+        return previousGrid[rowIndex][cellIndex];
+    }
+
+    private Integer liveNeighbours(Integer rowIndex, Integer cellIndex) {
+        Integer neighbourCount = 0;
+
+        for (Integer[] indexModifiers : neighbourLocations) {
+            if (rowIndex + indexModifiers[0] >= 0 && cellIndex + indexModifiers[1] >= 0 && rowIndex + indexModifiers[0] < grid.length && cellIndex + indexModifiers[1] < grid[rowIndex].length && previousGrid[rowIndex + indexModifiers[0]][cellIndex + indexModifiers[1]] == "#") {
+                neighbourCount += 1;
+            }
+        }
+        return neighbourCount;
     }
 }
